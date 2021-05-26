@@ -4,6 +4,7 @@ var roleBuilder = require('role.builder');
 var roleMiner = require('role.miner');
 var roleTransporter = require('role.transporter');
 var repairer = require('role.repair');
+const roleRepair = require('./role.repair');
 
 module.exports.loop = function () {
 
@@ -153,5 +154,15 @@ module.exports.loop = function () {
         if (creep.memory.role == 'builder') {
             roleBuilder.run(creep);
         }
+        if (creep.memory.role == 'miner') {
+            roleMiner.run(creep);
+        }
+        if (creep.memory.role == 'transporter') {
+            roleTransporter.run(creep);
+        }
+        if (creep.memory.role == 'repairer') {
+            roleRepair.run(creep);
+        }
+        
     }
 }
