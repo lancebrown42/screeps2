@@ -3,7 +3,7 @@ var roleRepair = {
         
         if(creep.memory.repairing && creep.carry.energy == 0 ){
             creep.memory.repairing = false;
-            creep.say('harvesting')
+            creep.say('gathering')
             
         }
         if(!creep.memory.repairing && creep.carry.energy == creep.carryCapacity){
@@ -50,8 +50,12 @@ var roleRepair = {
         }
         
         if(!creep.memory.repairing){
-            var source = creep.pos.findClosestByPath(FIND_SOURCES)
-            if(creep.harvest(source) == ERR_NOT_IN_RANGE){
+            var source = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                filter: (struct)=>{
+                    return struct.structureType==STRUCTURE_CONTAINER && struct.store[RESOURCE_ENERGY] > 0
+                }
+            })
+            if(creep.withdraw(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE){
                 creep.moveTo(source)
             }
             
