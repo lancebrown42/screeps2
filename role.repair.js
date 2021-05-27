@@ -1,7 +1,7 @@
 var roleRepair = {
     run: function(creep){
         
-        if(creep.memory.repairing && creep.carry.energy == 0 ){
+        if(creep.carry.energy == 0 ){
             creep.memory.repairing = false;
             creep.say('gathering')
             
@@ -10,6 +10,16 @@ var roleRepair = {
             creep.memory.repairing = true;
             creep.say('repairing')
         }
+        var containerCritical = creep.pos.findClosestByPath(FIND_STRUCTURES,{
+            filter:(structure)=>{
+                return ((structure.hits <= (structure.hitsMax *0.5)) &&(structure.structureType == STRUCTURE_CONTAINER))
+            }
+        })
+        var containerMaintain = creep.pos.findClosestByPath(FIND_STRUCTURES,{
+            filter:(structure)=>{
+                return ((structure.hits <= (structure.hitsMax *0.8)) &&(structure.structureType == STRUCTURE_CONTAINER))
+            }
+        })
         var roadCritical = creep.pos.findClosestByPath(FIND_STRUCTURES,{
             filter: function(object){
                 return ((object.hits <= (object.hitsMax * 0.5)) && (object.structureType == STRUCTURE_ROAD))
@@ -26,10 +36,22 @@ var roleRepair = {
             }
         })
         if(creep.memory.repairing){
-            if (roadCritical){
+            if(containerCritical){
+                creep.say('ContainerCrit')
+                if(creep.repair(containerCritical)==ERR_NOT_IN_RANGE){
+                    creep.moveTo(containerCritical)
+                }
+            }
+            else if (roadCritical){
                 creep.say('RoadCrit')
                 creep.moveTo(roadCritical)
                 creep.repair(roadCritical)
+            }
+            if(containerMaintain){
+                creep.say('ContainerMaint')
+                if(creep.repair(containerMaintain)==ERR_NOT_IN_RANGE){
+                    creep.moveTo(containerMaintain)
+                }
             }
             else if(roadMaintain){
                 creep.say('RoadMaint')
@@ -57,7 +79,8 @@ var roleRepair = {
                 }
             })
             if(containers.length > 0 ){
-                if(creep.withdraw(containers[0])==ERR_NOT_IN_RANGE){
+                // console.log(containers[0])
+                if(creep.withdraw(containers[0], RESOURCE_ENERGY)==ERR_NOT_IN_RANGE){
 
                     creep.moveTo(containers[0], {visualizePathStyle: {stroke: '#ffaa00'}});
                 }
