@@ -4,6 +4,7 @@ var roleBuilder = require('role.builder');
 var roleMiner = require('role.miner');
 var roleTransporter = require('role.transporter');
 var roleRepair = require('role.repair');
+var roleClaim = require('role.claim');
 
 
 module.exports.loop = function () {
@@ -92,7 +93,7 @@ module.exports.loop = function () {
                     var newName = 'Transporter' + Game.time;
                     console.log('Spawning new transporter: ' + newName);
                     Game.spawns['Spawn1'].spawnCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], newName,
-                        { memory: { role: 'transporter', hauling: false, fare:"", fareDest:"", tugging:false } });
+                        { memory: { role: 'transporter', hauling: false, fare:"", fareDest:"", tugging:false, narrow:false } });
 
                 }
                 else if (repairers.length < 1){
@@ -191,6 +192,9 @@ module.exports.loop = function () {
         }
         if (creep.memory.role == 'repairer') {
             roleRepair.run(creep);
+        }
+        if(creep.memory.role =='claimer'){
+            roleClaim.run(creep);
         }
         
     }

@@ -1,9 +1,9 @@
 var roleTransport = {
 
     run: function (creep) {
+      
         if(!creep.memory.tugging){
             
-
             var fares = creep.room.find(FIND_CREEPS,{
                 filter:(fare)=>{
                     return(fare.memory.role=="miner" && fare.memory.arrived == false && !fare.memory.driver)
@@ -21,14 +21,20 @@ var roleTransport = {
             var fare = Game.getObjectById(creep.memory.fare)
             var destination = new RoomPosition(creep.memory.fareDest.x, creep.memory.fareDest.y, creep.memory.fareDest.roomName)
             if(!creep.pos.isNearTo(fare)){
-                creep.say("Grabbing fare 🚖")
+                creep.say("🚖")
                 creep.moveTo(fare)
             }else if(!creep.pos.isEqualTo(destination)&& !fare.pos.isEqualTo(destination)){
-                // creep.say("pulling fare")
                 creep.pull(fare);
                 fare.move(creep);
-                // fare.say("moving")
-                creep.moveTo(destination);
+                if(creep.pos.isEqualTo(Game.flags['PathStart'])){
+                    creep.memory.narrow = true
+                }
+                if(creep.memory.narrow){
+                    creep.moveByPath(Room.deserializePath('4831455566664555'))
+                }else{
+                    creep.moveTo(destination);
+                }
+
             }else if(creep.pos.isEqualTo(destination)){
                 creep.pull(fare);
                 fare.move(creep);
@@ -37,7 +43,11 @@ var roleTransport = {
             }else{
                 
                 creep.memory.tugging = false;
-                creep.memory.fare=="";
+                creep.memory.fare="";
+                creep.memory.narrow = false;
+            }
+            if(creep.ticksToLive < 10){
+                fare.memory.driver="";
             }
 
             
@@ -92,7 +102,8 @@ var roleTransport = {
                 filter: (structure) => {
                     return (structure.structureType == STRUCTURE_EXTENSION ||
                             structure.structureType == STRUCTURE_SPAWN ||
-                            structure.structureType == STRUCTURE_TOWER) && 
+                            structure.structureType == STRUCTURE_TOWER ||
+                            structure.structureType == STRUCTURE_STORAGE) && 
                             structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
                 }
         });
