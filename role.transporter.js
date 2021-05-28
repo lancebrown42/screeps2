@@ -19,11 +19,12 @@ var roleTransport = {
             }
         }else{
             var fare = Game.getObjectById(creep.memory.fare)
-            var destination = new RoomPosition(creep.memory.fareDest.x, creep.memory.fareDest.y, creep.memory.fareDest.roomName)
+            var destination = new RoomPosition(creep.memory.fareDest.x, creep.memory.fareDest.y, creep.memory.fareDest.roomName);
             if(!creep.pos.isNearTo(fare)){
                 creep.say("🚖")
                 creep.moveTo(fare)
             }else if(!creep.pos.isEqualTo(destination)&& !fare.pos.isEqualTo(destination)){
+                // console.log(destination.x)
                 creep.pull(fare);
                 fare.move(creep);
                 if(creep.pos.isEqualTo(Game.flags['PathStart'])){
@@ -32,6 +33,7 @@ var roleTransport = {
                 if(creep.memory.narrow){
                     creep.moveByPath(Room.deserializePath('4831455566664555'))
                 }else{
+                    // console.log("moving to " + typeof destination)
                     creep.moveTo(destination);
                 }
 
@@ -76,21 +78,33 @@ var roleTransport = {
                 }
 
             })
+            
 
             if (dropped.length > 0) {
                 
-                if (creep.pickup(dropped[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                if (creep.pickup(dropped[0]) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(dropped[0])
+                // }else if(creep.withdraw(creep.pos.findClosestByPath(FIND_STRUCTURES,{filter:(struc)=>{return struc.structureType==STRUCTURE_CONTAINER&&struc.store[RESOURCE_ENERGY] > 0}}),RESOURCE_ENERGY) ==ERR_NOT_IN_RANGE){
+                //     creep.pickup(dropped[0], RESOURCE_ENERGY)
+                //     creep.memory.hauling = true
                 }else{
+                    creep.pickup(dropped[0])
+                    // try{creep.withdraw(creep.pos.findClosestByPath(FIND_STRUCTURES,{filter:(struc)=>{return struc.structureType==STRUCTURE_CONTAINER&&struc.store[RESOURCE_ENERGY] > 0}}),RESOURCE_ENERGY)}
+                    // catch(e){
+
+                    // }
                     creep.memory.hauling = true
                 }
             } else if (tombs.length > 0) {
                 if (creep.withdraw(tombs[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(tombs[0])
-                }else{
+                }else if(creep.store.getFreeCapacity ==0){
                     creep.memory.hauling = true
                 }
             } else if (sources.length > 0) {
+                // console.log(JSON.stringify(sources[0].store["energy"]))
+                sources.sort((a,b)=>{return b.store[RESOURCE_ENERGY] - a.store[RESOURCE_ENERGY]})
+                // console.log(JSON.stringify(sources[0].store[RESOURCE_ENERGY]))
                 if (creep.withdraw(sources[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(sources[0])
                 }else{
@@ -102,7 +116,6 @@ var roleTransport = {
                 filter: (structure) => {
                     return (structure.structureType == STRUCTURE_EXTENSION ||
                             structure.structureType == STRUCTURE_SPAWN ||
-                            structure.structureType == STRUCTURE_TOWER ||
                             structure.structureType == STRUCTURE_STORAGE) && 
                             structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
                 }
@@ -110,6 +123,7 @@ var roleTransport = {
         var overflow = creep.room.find(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return (structure.structureType == STRUCTURE_CONTAINER ||
+                        structure.structureType == STRUCTURE_TOWER ||
                             structure.structureType == STRUCTURE_STORAGE) && 
                             structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
                 }
@@ -126,7 +140,9 @@ var roleTransport = {
         }
             
         }
-
+        if(creep.room != Game.rooms['E1S14']){
+            creep.moveTo(Game.spawns.Spawn1)
+        }
     }
 
 

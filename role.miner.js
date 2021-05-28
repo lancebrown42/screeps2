@@ -10,8 +10,6 @@ var roleMiner = {
             if(JSON.stringify(creep.pos)==JSON.stringify(creep.memory.miningloc)){
                 creep.memory.arrived = true;
                 creep.harvest(Game.getObjectById(creep.memory.targetSource))
-            }else{
-                creep.moveTo(creep.memory.miningloc.x, creep.memory.miningloc.y)
             }
             
             

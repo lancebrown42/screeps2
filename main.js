@@ -5,6 +5,7 @@ var roleMiner = require('role.miner');
 var roleTransporter = require('role.transporter');
 var roleRepair = require('role.repair');
 var roleClaim = require('role.claim');
+var roleLongDistanceHarvester = require('role.longDistanceHarvester');
 
 
 module.exports.loop = function () {
@@ -43,6 +44,7 @@ module.exports.loop = function () {
     var transporters = _.filter(Game.creeps, (creep) => creep.memory.role == 'transporter');
     var miners = _.filter(Game.creeps, (creep) => creep.memory.role == 'miner');
     var repairers = _.filter(Game.creeps, (creep) => creep.memory.role == 'repairer');
+    var ldHarvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'longDistanceHarvester')
     var containers = _.filter(Game.spawns.Spawn1.room.find(FIND_STRUCTURES, {
         filter: (struc) => {
             return struc.structureType == STRUCTURE_CONTAINER
@@ -58,20 +60,18 @@ module.exports.loop = function () {
                     try{
 
                         var newName = 'Miner' + Game.time;
-                        var miningSpot;
+                        var miningSpot = {};
                         var miningSource = "";
                         console.log('Spawning new Miner: ' + newName);
                         for(spot of Memory.miningTiles){
                             // console.log(spot.miner)
-                            if (!spot.miner){
-                                miningSpot = new RoomPosition(spot.loc.x, spot.loc.y, spot.loc.roomName);
+                            if (spot.miner==""||spot.miner==[]){
+                                miningSpot = spot.loc;
                                 spot.miner = newName;
                                 miningSource = spot.adjSource
                                 break;
                             }
-                            else{
-                                
-                            }
+                            
                         }
                         
                         Game.spawns['Spawn1'].spawnCreep([WORK, WORK,WORK, WORK, WORK], newName,
@@ -87,7 +87,7 @@ module.exports.loop = function () {
                         
 
                 }
-                else if (transporters.length < miners.length) {
+                else if (transporters.length < miners.length+3) {
 
 
                     var newName = 'Transporter' + Game.time;
@@ -95,6 +95,12 @@ module.exports.loop = function () {
                     Game.spawns['Spawn1'].spawnCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], newName,
                         { memory: { role: 'transporter', hauling: false, fare:"", fareDest:"", tugging:false, narrow:false } });
 
+                }
+                else if(ldHarvesters.length < 2){
+                    var newName = 'LongHarvester' + Game.time;
+                    console.log('Spawning new long harvester: ' + newName);
+                    Game.spawns['Spawn1'].spawnCreep([WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], newName,
+                        { memory: { role: 'longDistanceHarvester', harvesting: true, home: 'E1S14', target:'E2S14' } });
                 }
                 else if (repairers.length < 1){
                     var newName = 'Repairer' + Game.time;
@@ -113,6 +119,7 @@ module.exports.loop = function () {
                         { memory: { role: 'harvester', harvesting: true } });
 
                 }
+                
             }
             if (upgraders.length < 4) {
 
@@ -121,13 +128,13 @@ module.exports.loop = function () {
                 Game.spawns['Spawn1'].spawnCreep([WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], newName,
                     { memory: { role: 'upgrader', upgrading: false } });
             }
-            else if (builders.length < 1) {
+            else if (builders.length < 4) {
 
 
 
                 var newName = 'Builder' + Game.time;
                 console.log('Spawning new bigger Builder: ' + newName);
-                Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE], newName,
+                Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE], newName,
                     { memory: { role: 'builder', building: false } });
 
             }
@@ -142,7 +149,7 @@ module.exports.loop = function () {
 
         }
 
-        else if (upgraders.length < 3) {
+        else if (upgraders.length < 2) {
 
 
 
@@ -195,6 +202,9 @@ module.exports.loop = function () {
         }
         if(creep.memory.role =='claimer'){
             roleClaim.run(creep);
+        }
+        if(creep.memory.role=='longDistanceHarvester'){
+            roleLongDistanceHarvester.run(creep)
         }
         
     }

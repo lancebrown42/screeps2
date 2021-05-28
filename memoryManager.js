@@ -7,6 +7,8 @@ var memoryManager = {
         Memory.miningTiles = [];
         
     for(source of sources){
+        try{
+            
        for(var i = -1; i <=1; i++){
            for(var j = -1; j<=1; j++){
                var newX = source.pos.x+i;
@@ -20,11 +22,16 @@ var memoryManager = {
                     }else{existingMiner = ""}
                }
                if(terr.get(newX, newY)!=1){
-                   Memory.miningTiles.push({loc: new RoomPosition(source.pos.x+i, source.pos.y+j, "E1S14"), adjSource: source.id, miner: existingMiner})
+                //   console.log(JSON.stringify(source))
+                   Memory.miningTiles.push({loc: new RoomPosition(source.pos.x+i, source.pos.y+j, source.pos.roomName), adjSource: source.id, miner: existingMiner})
                    console.log("Added (" + newX + "," + newY + ")")
+                   throw("done " + source);
                }
            }
        }
+        }catch(e){
+            console.log(e)
+        }
     }
     }
 }
