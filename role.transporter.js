@@ -14,7 +14,16 @@ var roleTransport = {
                 fare = fares[0];
                 Game.getObjectById(fare.id).memory.driver = creep.name;
                 creep.memory.fare = fare.id;
+                if(fare.memory.miningloc){
+                    
                 creep.memory.fareDest = fare.memory.miningloc;
+                }else{
+                    require('memoryManager').sources('E1S14')
+                    fare.memory.miningloc = Memory.miningTiles[0].loc;
+                    creep.memory.fareDest = fare.memory.miningloc;
+                    fare.memory.targetSource = Memory.miningTiles[0].adjSource;
+                    Memory.miningTiles[0].miner = fare;
+                }
                 creep.memory.tugging = true;
             }
         }else{
@@ -122,7 +131,7 @@ var roleTransport = {
         });
         var overflow = creep.room.find(FIND_STRUCTURES, {
                 filter: (structure) => {
-                    return (structure.structureType == STRUCTURE_CONTAINER ||
+                    return (
                         structure.structureType == STRUCTURE_TOWER ||
                             structure.structureType == STRUCTURE_STORAGE) && 
                             structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;

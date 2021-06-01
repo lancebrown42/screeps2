@@ -15,9 +15,13 @@ var roleLongDistanceHarvester = {
                     creep.moveTo(sources);
                 }
             }else{
-                creep.say('3')
+                // creep.say('3')
                 var homeexit = creep.room.findExitTo(Game.rooms[creep.memory.home])
                 creep.moveTo(creep.pos.findClosestByPath(homeexit))
+            }
+            if(creep.ticksToLive < 250){
+                creep.memory.role="upgrader"
+                console.log(creep.name + " changed to remote upgrader")
             }
         }
         else if(creep.room == Game.rooms[creep.memory.home] && creep.store[RESOURCE_ENERGY] > 0) {

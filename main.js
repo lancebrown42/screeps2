@@ -17,7 +17,7 @@ module.exports.loop = function () {
     })[0];
     if (tower) {
         var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-            filter: (structure) => structure.hits < structure.hitsMax
+            filter: (structure) => structure.hits < structure.hitsMax && structure.structureType!=STRUCTURE_WALL
         });
         if (closestDamagedStructure) {
             tower.repair(closestDamagedStructure);
@@ -32,8 +32,32 @@ module.exports.loop = function () {
         if (!Game.creeps[name]) {
             delete Memory.creeps[name];
             console.log('Clearing non-existing creep memory:', name);
+            for(tile in Memory.miningTiles){
+                if(tile.miner==name){
+                    tile.miner="";
+                }
+            }
         }
     }
+    var tower2 = Game.rooms['E2S14'].find(FIND_STRUCTURES, {
+        filter: (struct) => {
+            return struct.structureType == STRUCTURE_TOWER;
+        }
+    })[0];
+    if (tower2) {
+        var closestDamagedStructure = tower2.pos.findClosestByRange(FIND_STRUCTURES, {
+            filter: (structure) => structure.hits < structure.hitsMax && structure.structureType!=STRUCTURE_WALL
+        });
+        if (closestDamagedStructure) {
+            tower2.repair(closestDamagedStructure);
+        }
+
+        var closestHostile = tower2.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+        if (closestHostile) {
+            tower2.attack(closestHostile);
+        }
+    }
+    
     
 
 
@@ -62,6 +86,7 @@ module.exports.loop = function () {
                         var newName = 'Miner' + Game.time;
                         var miningSpot = {};
                         var miningSource = "";
+                        require('memoryManager').sources(Game.rooms['E1S14'])
                         console.log('Spawning new Miner: ' + newName);
                         for(spot of Memory.miningTiles){
                             // console.log(spot.miner)
@@ -75,7 +100,7 @@ module.exports.loop = function () {
                         }
                         
                         Game.spawns['Spawn1'].spawnCreep([WORK, WORK,WORK, WORK, WORK], newName,
-                            { memory: { role: 'miner', miningloc: miningSpot, targetSource: miningSource, arrived: false, driver: "" } });
+                            { memory: { role: 'miner', miningloc: miningSpot, targetSource: miningSource, arrived: false, driver: "",  } });
                         }
                         
                         catch(e){
@@ -97,10 +122,13 @@ module.exports.loop = function () {
 
                 }
                 else if(ldHarvesters.length < 2){
+                    if(Game.spawns.Spawn1.room.energyAvailable >= 550){
+                        
                     var newName = 'LongHarvester' + Game.time;
                     console.log('Spawning new long harvester: ' + newName);
                     Game.spawns['Spawn1'].spawnCreep([WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], newName,
                         { memory: { role: 'longDistanceHarvester', harvesting: true, home: 'E1S14', target:'E2S14' } });
+                    }
                 }
                 else if (repairers.length < 1){
                     var newName = 'Repairer' + Game.time;
@@ -121,21 +149,22 @@ module.exports.loop = function () {
                 }
                 
             }
-            if (upgraders.length < 4) {
+            if (upgraders.length < 5) {
 
                 var newName = 'Upgrader' + Game.time;
                 console.log('Spawning new bigger upgrader: ' + newName);
                 Game.spawns['Spawn1'].spawnCreep([WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], newName,
                     { memory: { role: 'upgrader', upgrading: false } });
             }
-            else if (builders.length < 4) {
+            else if (builders.length < 2) {
 
-
+                if(Game.spawns.Spawn1.room.energyAvailable >= 550){
 
                 var newName = 'Builder' + Game.time;
                 console.log('Spawning new bigger Builder: ' + newName);
                 Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE], newName,
                     { memory: { role: 'builder', building: false } });
+                }
 
             }
         }
